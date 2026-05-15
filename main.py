@@ -81,7 +81,7 @@ class HomeScreen(Screen):
         root.add_widget(Label(text='AURA', font_size=dp(40), bold=True, color=ACCENT, size_hint_y=None, height=dp(60)))
         root.add_widget(Label(text='Semantic Core', font_size=dp(16), color=MUTED, size_hint_y=None, height=dp(28)))
         root.add_widget(Label(
-            text=f'{len(core.vocab)} tokens  {core.dims}D embeddings',
+            text=f'{len(core.vocab)} tokens  {core.dim}D embeddings',
             font_size=dp(13), color=MUTED, size_hint_y=None, height=dp(22)
         ))
         root.add_widget(Widget(size_hint_y=None, height=dp(12)))
