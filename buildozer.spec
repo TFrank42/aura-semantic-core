@@ -6,7 +6,8 @@ source.dir = .
 source.include_exts = py,bin
 source.include_patterns = aura_semantic_core.py,main.py,aura_brain.bin
 version = 1.0.0
-requirements = python3==3.11.9,kivy==2.3.0
+requirements = python3,kivy==2.3.0
+p4a.branch = v2023.09.16
 orientation = portrait
 fullscreen = 0
 android.permissions = INTERNET
