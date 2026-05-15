@@ -1,60 +1,40 @@
 name: Build AURA APK
-
 on:
   push:
-      branches: [main]
-        workflow_dispatch:
-
-        jobs:
-          build:
-              name: Build Android APK
-                  runs-on: ubuntu-22.04
-
-                      steps:
-                            - name: Checkout repository
-                                    uses: actions/checkout@v4
-
-                                          - name: Set up Python 3.11
-                                                  uses: actions/setup-python@v5
-                                                          with:
-                                                                    python-version: '3.11'
-
-                                                                          - name: Install system dependencies
-                                                                                  run: |
-                                                                                            sudo apt-get update -qq
-                                                                                                      sudo apt-get install -y --no-install-recommends \
-                                                                                                                  git zip unzip openjdk-17-jdk \
-                                                                                                                              build-essential libffi-dev libssl-dev \
-                                                                                                                                          python3-pip autoconf libtool pkg-config \
-                                                                                                                                                      zlib1g-dev cmake libstdc++6 libltdl-dev
-                                                                                                                                                      
-                                                                                                                                                            - name: Install Buildozer and Cython
-                                                                                                                                                                    run: |
-                                                                                                                                                                              pip install --upgrade pip
-                                                                                                                                                                                        pip install buildozer==1.5.0 cython==0.29.36
-                                                                                                                                                                                        
-                                                                                                                                                                                              - name: Cache Buildozer global dir
-                                                                                                                                                                                                      uses: actions/cache@v4
-                                                                                                                                                                                                              with:
-                                                                                                                                                                                                                        path: ~/.buildozer
-                                                                                                                                                                                                                                  key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
-                                                                                                                                                                                                                                            restore-keys: buildozer-${{ runner.os }}-
-                                                                                                                                                                                                                                            
-                                                                                                                                                                                                                                                  - name: Build APK (debug)
-                                                                                                                                                                                                                                                          run: buildozer -v android debug 2>&1 | tee build.log
-                                                                                                                                                                                                                                                          
-                                                                                                                                                                                                                                                                - name: Upload APK artifact
-                                                                                                                                                                                                                                                                        uses: actions/upload-artifact@v4
-                                                                                                                                                                                                                                                                                with:
-                                                                                                                                                                                                                                                                                          name: AURA-Semantic-Core-APK
-                                                                                                                                                                                                                                                                                                    path: bin/*.apk
-                                                                                                                                                                                                                                                                                                              retention-days: 30
-                                                                                                                                                                                                                                                                                                              
-                                                                                                                                                                                                                                                                                                                    - name: Upload build log on failure
-                                                                                                                                                                                                                                                                                                                            if: failure()
-                                                                                                                                                                                                                                                                                                                                    uses: actions/upload-artifact@v4
-                                                                                                                                                                                                                                                                                                                                            with:
-                                                                                                                                                                                                                                                                                                                                                      name: build-log
-                                                                                                                                                                                                                                                                                                                                                                path: build.log
-                                                                                                                                                                                                                                                                                                                                                                          retention-days: 7
-                                                                                                                                                                                                                                                                                                                                                                          
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install system deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y build-essential libffi-dev libssl-dev git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev cmake
+      - name: Install Buildozer
+        run: pip install buildozer==1.5.0 cython==0.29.36
+      - name: Cache Buildozer
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            .buildozer
+          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+      - name: Build APK
+        run: buildozer -v android debug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AURA-Semantic-Core-APK
+          path: bin/*.apk
+          retention-days: 30
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: .buildozer/android/platform/build-*/**/*.log
